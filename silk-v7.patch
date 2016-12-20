@@ -1,0 +1,36 @@
+--- silk-3.10.0/src/libflowsource/pdusource.c	2014-07-28 20:01:10.000000000 +0000
++++ silk-3.10.0.new/src/libflowsource/pdusource.c	2014-09-17 10:40:45.4109
+53025 +0000
+@@ -298,7 +298,7 @@ static int pduSourceRejectPacket(
+     if ((size_t)data_len < sizeof(v5Header)) {
+         /* length cannot even hold a PDU header */
+         pdu_status = PDU_TRUNCATED_HEADER;
+-    } else if (ntohs(pdu->hdr.version) != 5) {
++    } else if (ntohs(pdu->hdr.version) != 5 && ntohs(pdu->hdr.version) != 7) {
+         /* reject packet */
+         pdu_status = PDU_BAD_VERSION;
+     } else if (0 == (count = ntohs(pdu->hdr.count))) {
+@@ -543,7 +543,7 @@ static const v5PDU *pduSourceNextPkt(
+     router_boot = now - sysUptime;
+ 
+     /* Determine the current engine */
+-    target.id = ((uint16_t)pdu->hdr.engine_type << 8) | pdu->hdr.engine_id;
++    target.id = ((uint16_t)pdu->hdr.engine_type << 8) | (pdu->hdr.engine_id ^ pdu->hdr.version);
+     engine = source->engine_info;
+     if (engine == NULL || engine->id != target.id) {
+         /* Current engine info must be updated */
+@@ -748,8 +748,12 @@ static const v5Record *pduSourceGetNextR
+         }
+ 
+         /* Get next record, and decrement counter*/
+-        v5RPtr = &source->pdu->data[ntohs(source->pdu->hdr.count)
++	if (ntohs(source->pdu->hdr.version) == 7) {
++		v5RPtr = (char*)&(source->pdu->data) + (ntohs(source->pdu->hdr.count) - source->count--) * 52;
++	} else {
++		v5RPtr = &source->pdu->data[ntohs(source->pdu->hdr.count)
+                                     - source->count--];
++	}
+ 
+         /* Check for zero packets or bytes.  No need for byteswapping
+          * when checking zero. */
+
