@@ -1,0 +1,18 @@
+diff -urN silk-3.10.2/src/flowcap/flowcap.c silk-3.10.2.new/src/flowcap/flowcap.c
+--- silk-3.10.2/src/flowcap/flowcap.c	2015-05-21 18:09:30.000000000 +0100
++++ silk-3.10.2.new/src/flowcap/flowcap.c	2015-09-14 12:24:19.612938461 +0100
+@@ -447,13 +447,6 @@
+      * data */
+     switch (skpcProbeGetType(reader->probe)) {
+ #if SK_ENABLE_IPV6
+-      case PROBE_ENUM_NETFLOW_V5:
+-        /* the probe can only send IPv4 flows */
+-        file_format = FT_FLOWCAP;
+-        rec_version = flowcap_version;
+-        break;
+-#endif
+-#if SK_ENABLE_IPV6
+       default:
+         file_format = FT_RWIPV6ROUTING;
+         rec_version = SK_RECORD_VERSION_ANY;
+
